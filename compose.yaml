@@ -7,13 +7,13 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: market
-      POSTGRES_PASSWORD: market_dev_2026
+      POSTGRES_PASSWORD: 
       POSTGRES_DB: market
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
   mongodb:
     image: mongo:8
@@ -21,12 +21,12 @@ services:
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: market
-      MONGO_INITDB_ROOT_PASSWORD: market_mongo_2026
+      MONGO_INITDB_ROOT_PASSWORD: 
     ports:
       - "127.0.0.1:27017:27017"
     volumes:
       - mongo_data:/data/db
-      - ./mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+      - ./infra/mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
 
 volumes:
   postgres_data:
