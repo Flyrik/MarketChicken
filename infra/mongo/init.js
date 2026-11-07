@@ -61,10 +61,15 @@ if (!catalogDb.getCollectionNames().includes(collectionName)) {
 }
 
 catalogDb[collectionName].createIndex(
-  { product_id: 1 },
+  { product_id: 1 }, // Ordre croissant sur le champ product_id
   { unique: true, name: "uq_catalog_product_id" }
 );
 
+// On crée un index textuel sur les champs "name" et "category" pour permettre la recherche textuelle dans le catalogue.
+catalogDb[collectionName].createIndex(
+  { name: "text", category: "text" },
+  { name: "idx_catalog_text" }
+);
 
 
 // On crée un catalogue de produits de poulet 
