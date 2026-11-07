@@ -31,3 +31,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA auth TO auth_svc;
     GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA auth TO auth_svc;
 EOSQL
+
+
+
+# Mettre "End of Line Sequence" sur -> LF" pour que docker lancer bien le script. Sinon, il y a une erreur de syntaxe sur la ligne 1 (#!/bin/bash)  et le script ne s'exécute pas.
