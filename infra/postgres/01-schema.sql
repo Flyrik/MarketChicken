@@ -1,8 +1,20 @@
+
+/* 
+ * Ce fichier SQL crée les schémas et les tables nécessaires pour l'application MarketChicken.
+ * Il inclut également des contraintes de clé étrangère et des index pour améliorer les performances.
+ */
+
+
+
+ -- les sont schémas pour organiser les tables par domaine fonctionnel + on leur a mis des droits d'accès spécifiques pour les services qui en ont besoin.
+ -- Les droits d'accès sont gérés dans le fichier infra/postgres/02-roles.sh.
 CREATE SCHEMA IF NOT EXISTS orders;
 CREATE SCHEMA IF NOT EXISTS inventory;
 CREATE SCHEMA IF NOT EXISTS payments;
 CREATE SCHEMA IF NOT EXISTS auth;
 
+
+-- POUR RAPPEL LE SERIAL sur les primary key est un entier auto-incrémenté, pratique pour les identifiants uniques.
 CREATE TABLE IF NOT EXISTS orders.customers (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -83,3 +95,4 @@ CREATE INDEX IF NOT EXISTS stock_warehouse_id_idx
     ON inventory.stock (warehouse_id);
 CREATE INDEX IF NOT EXISTS user_roles_role_id_idx
     ON auth.user_roles (role_id);
+
