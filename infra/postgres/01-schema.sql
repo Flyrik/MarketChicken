@@ -14,7 +14,7 @@ CREATE SCHEMA IF NOT EXISTS payments;
 CREATE SCHEMA IF NOT EXISTS auth;
 
 
--- POUR RAPPEL LE SERIAL sur les primary key est un entier auto-incrémenté, pratique pour les identifiants uniques.
+-- POUR RAPPEL LE SERIAL sur les primary key est un entier auto-incrémenté, pratique pour les identifiants uniques. (on a pas besoin de les écrire explicitement lors de l'insertion, PostgreSQL s'en charge automatiquement).
 CREATE TABLE IF NOT EXISTS orders.customers (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,

@@ -1,5 +1,10 @@
 -- On va remplir notre base de données avec des données initiales pour les tests.
 
+
+
+
+
+
 -- CLIENTS 
 INSERT INTO orders.customers (name, email) VALUES
 ('Jean Dupont',    'jean.dupont@example.com'),
