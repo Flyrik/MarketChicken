@@ -1,0 +1,1 @@
+-- On va remplir notre base de données avec des données initiales pour les tests et le développement.
