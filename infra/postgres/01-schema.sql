@@ -43,16 +43,40 @@ CREATE TABLE IF NOT EXISTS orders.order_items (
 
 CREATE TABLE IF NOT EXISTS inventory.warehouses (
     id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL CONSTRAINT warehouses_name_uq UNIQUE,
     capacity_units INTEGER NOT NULL CHECK (capacity_units >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS inventory.stock (
-    product_id INTEGER PRIMARY KEY,
+    product_id INTEGER NOT NULL,
     warehouse_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity >= 0),
+    PRIMARY KEY (product_id, warehouse_id),
     CONSTRAINT stock_warehouse_fk
         FOREIGN KEY (warehouse_id) REFERENCES inventory.warehouses (id)
+);
+
+CREATE TABLE IF NOT EXISTS inventory.reservations (
+    id UUID PRIMARY KEY,
+    idempotency_key TEXT NOT NULL UNIQUE,
+    request_hash TEXT NOT NULL,
+    order_id INTEGER NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('reserved', 'confirmed', 'released')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS inventory.reservation_items (
+    reservation_id UUID NOT NULL,
+    product_id INTEGER NOT NULL,
+    warehouse_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    PRIMARY KEY (reservation_id, product_id, warehouse_id),
+    CONSTRAINT reservation_items_reservation_fk
+        FOREIGN KEY (reservation_id) REFERENCES inventory.reservations (id),
+    CONSTRAINT reservation_items_stock_fk
+        FOREIGN KEY (product_id, warehouse_id)
+        REFERENCES inventory.stock (product_id, warehouse_id)
 );
 
 CREATE TABLE IF NOT EXISTS payments.payments (
@@ -93,6 +117,7 @@ CREATE INDEX IF NOT EXISTS order_items_order_id_idx
     ON orders.order_items (order_id);
 CREATE INDEX IF NOT EXISTS stock_warehouse_id_idx
     ON inventory.stock (warehouse_id);
+CREATE INDEX IF NOT EXISTS reservations_order_id_idx
+    ON inventory.reservations (order_id);
 CREATE INDEX IF NOT EXISTS user_roles_role_id_idx
     ON auth.user_roles (role_id);
-

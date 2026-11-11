@@ -27,6 +27,8 @@ Bases de données (PostgreSQL schémas + MongoDB)
 
 Règle stricte : **un service ne lit jamais directement les tables d'un autre service**. S'il a besoin d'une donnée qui appartient à un autre domaine (ex: `orders` a besoin du prix d'un produit géré par `catalog`), il appelle l'API de ce service, jamais sa base.
 
+Le service `inventory` expose une API REST pour consulter les entrepôts et le stock, régler une quantité et réserver, confirmer ou libérer des quantités. Une réservation à plusieurs lignes est atomique ; `Idempotency-Key` empêche une nouvelle réservation lors d'une répétition de requête.
+
 ## Les 3 couches de "rôle" — à ne pas confondre
 
 Le mot "rôle" désigne 3 mécanismes différents dans ce projet, à des niveaux différents :
@@ -61,7 +63,7 @@ MongoDB n'a pas ce même découpage car une seule base Mongo est utilisée par u
 ## Couches encore à construire (voir roadmap)
 
 - **Gateway** (`gateway/`) : actuellement vide, à construire en Phase 2.
-- **Microservices** (`services/`) : actuellement vide, à construire en Phase 2.
+- **Microservices** (`services/`) : Catalogue (GraphQL) et Stock (REST) sont les premiers services implémentés ; Commandes, Paiement et Auth restent à construire.
 - **Streaming** (`streaming/`, Kafka + Spark Structured Streaming) : Phase 3.
 - **Data Lake** (MinIO + Spark + Delta/Iceberg) : Phase 4.
 - **Observabilité** (Prometheus/Grafana/OpenTelemetry) : Phase 6.

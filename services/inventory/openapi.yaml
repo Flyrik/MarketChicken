@@ -1,0 +1,320 @@
+openapi: 3.0.3
+info:
+  title: Market Inventory API
+  version: 1.0.0
+  description: API REST versionnée de gestion du stock, des entrepôts et des réservations.
+servers:
+  - url: http://localhost:4001
+paths:
+  /healthz:
+    get:
+      summary: Vérifier la connexion à PostgreSQL
+      responses:
+        "200":
+          description: Service disponible
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /v1/warehouses:
+    get:
+      summary: Lister les entrepôts
+      responses:
+        "200":
+          description: Liste des entrepôts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Warehouse"
+    post:
+      summary: Créer un entrepôt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, capacityUnits]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                capacityUnits:
+                  type: integer
+                  minimum: 0
+      responses:
+        "201":
+          description: Entrepôt créé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Warehouse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/stock:
+    get:
+      summary: Consulter le stock disponible
+      parameters:
+        - in: query
+          name: productId
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: warehouseId
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Quantités disponibles, filtrées si demandé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Stock"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    put:
+      summary: Définir la quantité disponible d'un produit dans un entrepôt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId, warehouseId, quantity]
+              properties:
+                productId:
+                  type: integer
+                  minimum: 1
+                warehouseId:
+                  type: integer
+                  minimum: 1
+                quantity:
+                  type: integer
+                  minimum: 0
+      responses:
+        "200":
+          description: Quantité mise à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Stock"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/reservations:
+    post:
+      summary: Réserver du stock de façon atomique et idempotente
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId, items]
+              properties:
+                orderId:
+                  type: integer
+                  minimum: 1
+                items:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    $ref: "#/components/schemas/ReservationItemInput"
+      responses:
+        "201":
+          description: Réservation créée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Reservation"
+        "200":
+          description: Réponse idempotente, réservation déjà créée
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/reservations/{reservationId}:
+    parameters:
+      - $ref: "#/components/parameters/ReservationId"
+    get:
+      summary: Lire une réservation
+      responses:
+        "200":
+          description: Détail de réservation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Reservation"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/reservations/{reservationId}/release:
+    parameters:
+      - $ref: "#/components/parameters/ReservationId"
+    post:
+      summary: Libérer une réservation et rendre le stock
+      responses:
+        "200":
+          description: Réservation libérée
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/reservations/{reservationId}/confirm:
+    parameters:
+      - $ref: "#/components/parameters/ReservationId"
+    post:
+      summary: Confirmer une réservation après paiement réussi
+      responses:
+        "200":
+          description: Réservation confirmée
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+components:
+  parameters:
+    ReservationId:
+      in: path
+      name: reservationId
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    Warehouse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        capacityUnits:
+          type: integer
+    Stock:
+      type: object
+      properties:
+        productId:
+          type: integer
+        warehouseId:
+          type: integer
+        warehouseName:
+          type: string
+        availableQuantity:
+          type: integer
+        capacityUnits:
+          type: integer
+    ReservationItemInput:
+      type: object
+      required: [productId, warehouseId, quantity]
+      properties:
+        productId:
+          type: integer
+          minimum: 1
+        warehouseId:
+          type: integer
+          minimum: 1
+        quantity:
+          type: integer
+          minimum: 1
+    Reservation:
+      type: object
+      properties:
+        reservationId:
+          type: string
+          format: uuid
+        idempotencyKey:
+          type: string
+        orderId:
+          type: integer
+        status:
+          type: string
+          enum: [reserved, confirmed, released]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReservationItemInput"
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+  responses:
+    BadRequest:
+      description: Requête invalide
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Ressource introuvable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Conflit de stock ou d'état de réservation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalError:
+      description: Erreur interne
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
