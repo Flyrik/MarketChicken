@@ -22,7 +22,7 @@ Bases de données (PostgreSQL schémas + MongoDB)
 | `orders` | PostgreSQL schéma `orders` | `orders_svc` | catalog, stock, payment |
 | `inventory` (stock) | PostgreSQL schéma `inventory` | `inventory_svc` | aucun |
 | `payments` | PostgreSQL schéma `payments` | `payments_svc` | aucun |
-| `catalog` | MongoDB `market_catalog` | (à définir si besoin) | aucun |
+| `catalog` | MongoDB `market_catalog` | utilisateur Mongo `catalog_svc` limité à `readWrite` sur sa base | aucun |
 | `auth` | PostgreSQL schéma `auth` | `auth_svc` | aucun |
 
 Règle stricte : **un service ne lit jamais directement les tables d'un autre service**. S'il a besoin d'une donnée qui appartient à un autre domaine (ex: `orders` a besoin du prix d'un produit géré par `catalog`), il appelle l'API de ce service, jamais sa base.
@@ -47,7 +47,7 @@ Avant ce découpage, tous les services se connectaient avec un seul compte admin
 
 Avec un rôle dédié par service (`orders_svc`, `inventory_svc`, `payments_svc`, `auth_svc`), chacun n'a de droits (`USAGE` + `SELECT/INSERT/UPDATE/DELETE` + accès aux séquences) **que sur son propre schéma**. Voir `infra/postgres/02-roles.sh` pour l'implémentation.
 
-MongoDB n'a pas ce même découpage car une seule base Mongo est utilisée par un seul service (`catalog`) — il n'y a personne d'autre à isoler.
+Le service `catalog` utilise lui aussi un compte applicatif dédié, limité à sa base MongoDB. Il ne se connecte pas avec le compte administrateur Mongo.
 
 ## Flux d'une requête type : `GET /v1/orders`
 

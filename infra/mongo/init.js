@@ -192,3 +192,19 @@ catalogDb.catalog.insertMany([
   }
 ]);
 
+catalogDb[collectionName].updateMany(
+  { indexed_at: { $exists: false } },
+  { $set: { indexed_at: new Date() } }
+);
+
+const maxProduct = catalogDb[collectionName]
+  .find({}, { product_id: 1, _id: 0 })
+  .sort({ product_id: -1 })
+  .limit(1)
+  .toArray()[0];
+
+catalogDb.sequences.updateOne(
+  { _id: "product_id" },
+  { $max: { value: maxProduct ? maxProduct.product_id : 0 } },
+  { upsert: true }
+);
