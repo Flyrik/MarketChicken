@@ -2,7 +2,7 @@
 -- Requête testée : "commandes du jour" (onglet Vue d'ensemble)
 -- Tout est dans une transaction annulée à la fin : la base reste propre.
 
---- Commande pour tester :  
+--- Commande pour tester (bash):  
 --- docker exec -i market-postgres psql -U market -d market < scripts/explain_demo.sql
 
 
