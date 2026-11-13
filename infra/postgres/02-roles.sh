@@ -20,6 +20,10 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     GRANT USAGE ON SCHEMA inventory TO inventory_svc;
     GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA inventory TO inventory_svc;
     GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA inventory TO inventory_svc;
+    ALTER DEFAULT PRIVILEGES FOR ROLE market IN SCHEMA inventory
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO inventory_svc;
+    ALTER DEFAULT PRIVILEGES FOR ROLE market IN SCHEMA inventory
+        GRANT USAGE, SELECT ON SEQUENCES TO inventory_svc;
 
     CREATE ROLE payments_svc LOGIN PASSWORD '$PAYMENTS_DB_PASSWORD';
     GRANT USAGE ON SCHEMA payments TO payments_svc;
