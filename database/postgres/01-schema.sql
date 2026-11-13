@@ -111,14 +111,23 @@ CREATE TABLE IF NOT EXISTS auth.user_roles (
         FOREIGN KEY (role_id) REFERENCES auth.roles (id) ON DELETE CASCADE
 );
 
+-- Commandes d'un client
 CREATE INDEX IF NOT EXISTS orders_customer_id_idx
     ON orders.orders (customer_id);
+
+-- Détail d'une commande : ses lignes
 CREATE INDEX IF NOT EXISTS order_items_order_id_idx
     ON orders.order_items (order_id);
+
+-- Logistique : stock par entrepôt (taux de remplissage)
 CREATE INDEX IF NOT EXISTS stock_warehouse_id_idx
     ON inventory.stock (warehouse_id);
+
+-- Stock : retrouver la réservation d'une commande (rendre le stock si le paiement échoue)
 CREATE INDEX IF NOT EXISTS reservations_order_id_idx
     ON inventory.reservations (order_id);
+
+-- Auth : utilisateurs ayant un rôle donné
 CREATE INDEX IF NOT EXISTS user_roles_role_id_idx
     ON auth.user_roles (role_id);
 
