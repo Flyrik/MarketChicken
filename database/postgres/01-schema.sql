@@ -121,3 +121,11 @@ CREATE INDEX IF NOT EXISTS reservations_order_id_idx
     ON inventory.reservations (order_id);
 CREATE INDEX IF NOT EXISTS user_roles_role_id_idx
     ON auth.user_roles (role_id);
+
+-- Vue d'ensemble : commandes du jour, commandes récentes
+CREATE INDEX IF NOT EXISTS orders_created_at_idx
+    ON orders.orders (created_at);
+
+-- Paiement d'une commande : afficher son statut et éviter d'encaisser deux fois
+CREATE INDEX IF NOT EXISTS payments_order_id_idx
+    ON payments.payments (order_id);
