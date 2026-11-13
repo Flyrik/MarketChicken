@@ -21,11 +21,10 @@ contrôle de santé sur `http://localhost:4000/healthz`.
 
 Les tests unitaires vérifient le schéma GraphQL, les filtres, les mutations et
 les validations avec une collection Mongo simulée. Depuis la racine du dépôt,
-ils peuvent être lancés dans un conteneur Node sans installer Node.js sur
-l'hôte :
+lancez-les dans leur conteneur dédié :
 
 ```powershell
-docker run --rm --mount "type=bind,source=$((Get-Location).Path)\services\catalog,target=/app" -w /app node:22-alpine sh -c "npm ci --no-audit --no-fund && npm test"
+docker compose run --rm catalog-test
 ```
 
 Les tests n'effacent ni ne modifient les données MongoDB.

@@ -47,6 +47,59 @@ services: #nos services (conteneurs) à lancer
       timeout: 5s
       retries: 20
 
+  rustfs:
+    image: rustfs/rustfs:1.0.5
+    container_name: market-rustfs
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      RUSTFS_VOLUMES: /data/rustfs{0..3}
+      RUSTFS_ADDRESS: "0.0.0.0:9000"
+      RUSTFS_CONSOLE_ADDRESS: "0.0.0.0:9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_UNSAFE_BYPASS_DISK_CHECK: "true"
+      RUSTFS_ACCESS_KEY: ${OBJECT_STORAGE_ACCESS_KEY:?Define OBJECT_STORAGE_ACCESS_KEY in .env}
+      RUSTFS_SECRET_KEY: ${OBJECT_STORAGE_SECRET_KEY:?Define OBJECT_STORAGE_SECRET_KEY in .env}
+    ports:
+      - "127.0.0.1:9100:9000"
+      - "127.0.0.1:9101:9001"
+    volumes:
+      - object_storage_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  raw-ingestion:
+    build:
+      context: ./data/raw-ingestion
+    profiles:
+      - data
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: market
+      DB_USER: inventory_svc
+      DB_PASSWORD: ${INVENTORY_DB_PASSWORD:?Define INVENTORY_DB_PASSWORD in .env}
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_DATABASE: market_catalog
+      MONGO_USERNAME: catalog_svc
+      MONGO_PASSWORD: ${CATALOG_MONGO_PASSWORD:?Define CATALOG_MONGO_PASSWORD in .env}
+      OBJECT_STORAGE_ENDPOINT: http://rustfs:9000
+      OBJECT_STORAGE_BUCKET: market-data
+      OBJECT_STORAGE_ACCESS_KEY: ${OBJECT_STORAGE_ACCESS_KEY:?Define OBJECT_STORAGE_ACCESS_KEY in .env}
+      OBJECT_STORAGE_SECRET_KEY: ${OBJECT_STORAGE_SECRET_KEY:?Define OBJECT_STORAGE_SECRET_KEY in .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      rustfs:
+        condition: service_healthy
+
   catalog:
     build:
       context: ./services/catalog
@@ -75,6 +128,16 @@ services: #nos services (conteneurs) à lancer
       interval: 10s
       timeout: 3s
       retries: 5
+
+  catalog-test:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - ./services/catalog:/app:ro
+      - catalog_test_node_modules:/app/node_modules
+    command: sh -c "npm ci --no-audit --no-fund && npm test"
+    profiles:
+      - test
 
   inventory:
     build:
@@ -108,3 +171,5 @@ services: #nos services (conteneurs) à lancer
 volumes:
   postgres_data:
   mongo_data:
+  object_storage_data:
+  catalog_test_node_modules:
