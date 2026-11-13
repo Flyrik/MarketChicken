@@ -1,4 +1,7 @@
+
 const password = process.env.CATALOG_MONGO_PASSWORD;
+
+
 
 if (typeof password !== "string" || !/^[A-Fa-f0-9]{32,}$/.test(password)) {
   throw new Error(
