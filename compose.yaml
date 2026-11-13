@@ -17,7 +17,7 @@ services: #nos services (conteneurs) à lancer
       - "127.0.0.1:5432:5432"
     volumes:  # quels dossiers/fichiers partager entre la machine et le conteneur
       - postgres_data:/var/lib/postgresql/data
-      - ./infra/postgres:/docker-entrypoint-initdb.d:ro
+      - ./database/postgres:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
@@ -36,7 +36,7 @@ services: #nos services (conteneurs) à lancer
       - "127.0.0.1:27017:27017"
     volumes:
       - mongo_data:/data/db
-      - ./infra/mongo:/docker-entrypoint-initdb.d:ro
+      - ./database/mongo:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test:
         [
