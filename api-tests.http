@@ -1,0 +1,220 @@
+@catalogUrl = http://localhost:4000
+@inventoryUrl = http://localhost:4001
+@rustfsUrl = http://localhost:9100
+
+# Requetes de test pour les APIs actuellement implementees.
+# Gateway et API Dashboard ne sont pas encore implementees.
+# Les mutations laissent des donnees de test en base. Les entrepots et
+# reservations n'ont pas de route de suppression; les produits sont archives.
+
+### Sante de l'API S3 RustFS (ceci n'est pas l'interface web)
+GET {{rustfsUrl}}/health
+
+### Sante du service Catalogue
+GET {{catalogUrl}}/healthz
+
+### Lister les produits actifs
+POST {{catalogUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "query ListProducts { products { productId name category priceCents status tags description attributes indexedAt } }"
+}
+
+### Filtrer les produits par categorie et statut
+POST {{catalogUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "query FilterProducts($category: String!, $status: ProductStatus!) { products(category: $category, status: $status) { productId name category priceCents status } }",
+  "variables": {
+    "category": "filets",
+    "status": "active"
+  }
+}
+
+### Rechercher des produits
+POST {{catalogUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "query SearchProducts($search: String!) { products(search: $search) { productId name category description } }",
+  "variables": {
+    "search": "poulet"
+  }
+}
+
+### Lister les produits inactifs
+POST {{catalogUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "query ListInactiveProducts { products(status: inactive) { productId name status } }"
+}
+
+### Lire un produit par identifiant
+POST {{catalogUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "query GetProduct($productId: Int!) { product(productId: $productId) { productId name category priceCents status tags description attributes indexedAt } }",
+  "variables": {
+    "productId": 1
+  }
+}
+
+### Creer un produit de test
+# @name createCatalogProduct
+POST {{catalogUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation CreateProduct($input: ProductInput!) { createProduct(input: $input) { productId name category priceCents status tags description attributes indexedAt } }",
+  "variables": {
+    "input": {
+      "name": "Produit test API {{$guid}}",
+      "category": "tests",
+      "priceCents": 1234,
+      "status": "active",
+      "tags": ["test", "api"],
+      "description": "Produit cree par api-tests.http",
+      "attributes": {
+        "source": "api-tests.http"
+      }
+    }
+  }
+}
+
+### Modifier le produit cree ci-dessus
+POST {{catalogUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation UpdateProduct($productId: Int!, $input: ProductUpdateInput!) { updateProduct(productId: $productId, input: $input) { productId name priceCents indexedAt } }",
+  "variables": {
+    "productId": {{createCatalogProduct.response.body.$.data.createProduct.productId}},
+    "input": {
+      "priceCents": 1250,
+      "description": "Produit modifie par api-tests.http"
+    }
+  }
+}
+
+### Archiver le produit cree
+POST {{catalogUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation ArchiveProduct($productId: Int!) { archiveProduct(productId: $productId) { productId name status indexedAt } }",
+  "variables": {
+    "productId": {{createCatalogProduct.response.body.$.data.createProduct.productId}}
+  }
+}
+
+### Tester deleteProduct (suppression logique, sans effacement physique)
+POST {{catalogUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation DeleteProduct($productId: Int!) { deleteProduct(productId: $productId) { productId name status indexedAt } }",
+  "variables": {
+    "productId": {{createCatalogProduct.response.body.$.data.createProduct.productId}}
+  }
+}
+
+### Sante du service Stock
+GET {{inventoryUrl}}/healthz
+
+### Lister les entrepots
+GET {{inventoryUrl}}/v1/warehouses
+
+### Creer un entrepot de test
+# @name createTestWarehouse
+POST {{inventoryUrl}}/v1/warehouses
+Content-Type: application/json
+
+{
+  "name": "Entrepot test API {{$guid}}",
+  "capacityUnits": 100
+}
+
+### Lister tout le stock
+GET {{inventoryUrl}}/v1/stock
+
+### Filtrer le stock par produit
+GET {{inventoryUrl}}/v1/stock?productId=1
+
+### Definir le stock du produit 1 dans l'entrepot de test
+PUT {{inventoryUrl}}/v1/stock
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "warehouseId": {{createTestWarehouse.response.body.$.data.id}},
+  "quantity": 20
+}
+
+### Filtrer le stock par entrepot de test
+GET {{inventoryUrl}}/v1/stock?warehouseId={{createTestWarehouse.response.body.$.data.id}}
+
+### Lire le stock filtre par produit et entrepot
+GET {{inventoryUrl}}/v1/stock?productId=1&warehouseId={{createTestWarehouse.response.body.$.data.id}}
+
+### Creer une reservation de test qui sera ensuite liberee
+# @name createReleaseReservation
+POST {{inventoryUrl}}/v1/reservations
+Idempotency-Key: api-test-{{createTestWarehouse.response.body.$.data.id}}-release
+Content-Type: application/json
+
+{
+  "orderId": 900001,
+  "items": [
+    {
+      "productId": 1,
+      "warehouseId": {{createTestWarehouse.response.body.$.data.id}},
+      "quantity": 2
+    }
+  ]
+}
+
+### Rejouer la meme reservation (doit retourner la reservation existante)
+POST {{inventoryUrl}}/v1/reservations
+Idempotency-Key: api-test-{{createTestWarehouse.response.body.$.data.id}}-release
+Content-Type: application/json
+
+{
+  "orderId": 900001,
+  "items": [
+    {
+      "productId": 1,
+      "warehouseId": {{createTestWarehouse.response.body.$.data.id}},
+      "quantity": 2
+    }
+  ]
+}
+
+### Lire la reservation a liberer
+GET {{inventoryUrl}}/v1/reservations/{{createReleaseReservation.response.body.$.data.reservationId}}
+
+### Liberer la reservation et rendre le stock
+POST {{inventoryUrl}}/v1/reservations/{{createReleaseReservation.response.body.$.data.reservationId}}/release
+
+### Creer une deuxieme reservation, qui sera confirmee
+# @name createConfirmReservation
+POST {{inventoryUrl}}/v1/reservations
+Idempotency-Key: api-test-{{createTestWarehouse.response.body.$.data.id}}-confirm
+Content-Type: application/json
+
+{
+  "orderId": 900002,
+  "items": [
+    {
+      "productId": 1,
+      "warehouseId": {{createTestWarehouse.response.body.$.data.id}},
+      "quantity": 1
+    }
+  ]
+}
+
+### Confirmer la reservation
+POST {{inventoryUrl}}/v1/reservations/{{createConfirmReservation.response.body.$.data.reservationId}}/confirm

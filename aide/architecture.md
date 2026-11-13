@@ -65,5 +65,5 @@ Le service `catalog` utilise lui aussi un compte applicatif dédié, limité à 
 - **Gateway** (`gateway/`) : actuellement vide, à construire en Phase 2.
 - **Microservices** (`services/`) : Catalogue (GraphQL) et Stock (REST) sont les premiers services implémentés ; Commandes, Paiement et Auth restent à construire.
 - **Streaming** (`streaming/`, Kafka + Spark Structured Streaming) : Phase 3.
-- **Data Lake** (MinIO + Spark + Delta/Iceberg) : Phase 4.
+- **Data Lake** (RustFS compatible S3 + Spark + Delta/Iceberg) : Phase 4 ; le snapshot initial du catalogue et du stock vers la zone `raw` est disponible dans `data/raw-ingestion`. Les transformations Spark restent à construire.
 - **Observabilité** (Prometheus/Grafana/OpenTelemetry) : Phase 6.
