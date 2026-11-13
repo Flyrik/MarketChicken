@@ -20,6 +20,7 @@ INSERT INTO inventory.warehouses (name, capacity_units) VALUES
 
 -- STOCK (product_id = ceux du catalogue Mongo, warehouse_id = 1 ou 2) 
 
+
 INSERT INTO inventory.stock (product_id, warehouse_id, quantity) VALUES
 (1,  1,  50),   -- Ryzen 5 7600
 (2,  1,  40),   -- Core i5-14600K
