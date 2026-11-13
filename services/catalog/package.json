@@ -1,0 +1,15 @@
+{
+  "name": "market-catalog-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "graphql": "^16.11.0",
+    "graphql-yoga": "^5.16.2",
+    "mongodb": "^6.18.0"
+  }
+}

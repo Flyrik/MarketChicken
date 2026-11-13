@@ -18,6 +18,11 @@ services: #nos services (conteneurs) à lancer
     volumes:  # quels dossiers/fichiers partager entre la machine et le conteneur
       - postgres_data:/var/lib/postgresql/data
       - ./infra/postgres:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   mongodb:
     image: mongo:8
@@ -26,11 +31,50 @@ services: #nos services (conteneurs) à lancer
     environment:
       MONGO_INITDB_ROOT_USERNAME: market
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Define MONGO_ROOT_PASSWORD in .env}
+      CATALOG_MONGO_PASSWORD: ${CATALOG_MONGO_PASSWORD:?Define CATALOG_MONGO_PASSWORD in .env}
     ports:
       - "127.0.0.1:27017:27017"
     volumes:
       - mongo_data:/data/db
-      - ./infra/mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+      - ./infra/mongo:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet --username \"$${MONGO_INITDB_ROOT_USERNAME}\" --password \"$${MONGO_INITDB_ROOT_PASSWORD}\" --authenticationDatabase admin --eval \"db.adminCommand('ping').ok\" | grep -q 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  catalog:
+    build:
+      context: ./services/catalog
+    container_name: market-catalog
+    restart: unless-stopped
+    environment:
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_DATABASE: market_catalog
+      MONGO_USERNAME: catalog_svc
+      MONGO_PASSWORD: ${CATALOG_MONGO_PASSWORD:?Define CATALOG_MONGO_PASSWORD in .env}
+      PORT: 4000
+    ports:
+      - "127.0.0.1:4000:4000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
 volumes:
   postgres_data:
