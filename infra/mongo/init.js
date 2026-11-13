@@ -88,107 +88,106 @@ catalogDb[collectionName].createIndex(
 );
 
 // On crée un catalogue de produits de poulet 
-
+// Catalogue de composants PC
 catalogDb.catalog.insertMany([
   {
     product_id: NumberInt(1),
-    name: "Poulet rôti entier",
-    category: "rotisserie",
-    description: "Poulet rôti entier, prêt à manger, idéal pour les repas en famille.",
-    tags: ["poulet", "rôti", "entier", "repas familial"],
-    price_cents: NumberInt(899),
+    name: "AMD Ryzen 5 7600",
+    category: "cpu",
+    description: "Processeur 6 cœurs / 12 threads, idéal pour le gaming milieu de gamme.",
+    tags: ["cpu", "amd", "am5", "gaming"],
+    price_cents: NumberInt(19900),
     status: "active",
-    attributes: { weight_g: 1200, bio: false }
+    attributes: { cores: 6, threads: 12, boost_ghz: 5.1, socket: "AM5" }
   },
   {
     product_id: NumberInt(2),
-    name: "Pilons de poulet x6",
-    category: "pieces",
-    description: "Lot de 6 pilons de poulet, parfaits pour les barbecues et les repas rapides. ( Il aime trop Tristan #MP)",
-    tags: ["poulet", "pilons", "barbecue", "repas rapide"],
-    price_cents: NumberInt(549),
+    name: "Intel Core i5-14600K",
+    category: "cpu",
+    description: "Processeur 14 cœurs débloqué pour l'overclocking.",
+    tags: ["cpu", "intel", "lga1700", "overclocking"],
+    price_cents: NumberInt(28900),
     status: "active",
-    attributes: { pieces: 6, bio: false }
+    attributes: { cores: 14, threads: 20, boost_ghz: 5.3, socket: "LGA1700" }
   },
   {
     product_id: NumberInt(3),
-    name: "Ailes grillées x8",
-    category: "pieces",
-    description: "Lot de 8 ailes de poulet grillées, délicieusement assaisonnées pour un goût savoureux.",
-    tags: ["poulet", "ailes", "grillées", "assaisonnées"],
-    price_cents: NumberInt(649),
+    name: "NVIDIA GeForce RTX 4060 8 Go",
+    category: "gpu",
+    description: "Carte graphique pour jouer en 1080p avec ray tracing.",
+    tags: ["gpu", "nvidia", "1080p", "ray tracing"],
+    price_cents: NumberInt(29900),
     status: "active",
-    attributes: { pieces: 8, marinade: "barbecue" }
+    attributes: { vram_gb: 8, memory_type: "GDDR6", tdp_w: 115 }
   },
   {
     product_id: NumberInt(4),
-    name: "Nuggets poulet x20",
-    category: "transforme",
-    description: "Lot de 20 nuggets de poulet croustillants, parfaits pour les enfants et les apéritifs.",
-    tags: ["poulet", "nuggets", "croustillants", "apéritif"],
-    price_cents: NumberInt(499),
+    name: "AMD Radeon RX 7800 XT 16 Go",
+    category: "gpu",
+    description: "Carte graphique pour jouer en 1440p.",
+    tags: ["gpu", "amd", "1440p"],
+    price_cents: NumberInt(52900),
     status: "active",
-    attributes: { pieces: 20, panure: "croustillante" }
+    attributes: { vram_gb: 16, memory_type: "GDDR6", tdp_w: 263 }
   },
   {
     product_id: NumberInt(5),
-    name: "Escalopes de poulet x2",
-    category: "filets",
-    description: "Lot de 2 escalopes de poulet tendres, idéales pour des repas rapides et sains.",
-    tags: ["poulet", "escalopes", "tendres", "repas rapide"],
-    price_cents: NumberInt(699),
+    name: "Corsair Vengeance DDR5 32 Go (2x16) 6000 MHz",
+    category: "ram",
+    description: "Kit de mémoire DDR5 32 Go pour plateformes récentes.",
+    tags: ["ram", "ddr5", "corsair", "32go"],
+    price_cents: NumberInt(10900),
     status: "active",
-    attributes: { pieces: 2, weight_g: 300 }
+    attributes: { capacity_gb: 32, type: "DDR5", speed_mhz: 6000, modules: 2 }
   },
   {
     product_id: NumberInt(6),
-    name: "Cuisses de poulet x4",
-    category: "pieces",
-    description: "Lot de 4 cuisses de poulet, parfaites pour les plats mijotés et les repas en famille.",
-    tags: ["poulet", "cuisses", "mijoté", "repas familial"],
-    price_cents: NumberInt(749),
+    name: "Samsung 990 Pro 1 To NVMe",
+    category: "stockage",
+    description: "SSD NVMe PCIe 4.0 très rapide pour le système et les jeux.",
+    tags: ["ssd", "nvme", "samsung", "1to"],
+    price_cents: NumberInt(11900),
     status: "active",
-    attributes: { pieces: 4, bio: true }
+    attributes: { capacity_gb: 1000, interface: "NVMe PCIe 4.0", read_mbps: 7450 }
   },
   {
     product_id: NumberInt(7),
-    name: "Brochettes de poulet x6",
-    category: "transforme",
-    description: "Lot de 6 brochettes de poulet marinées, idéales pour les barbecues et les repas conviviaux.",
-    tags: ["poulet", "brochettes", "marinées", "barbecue"],
-    price_cents: NumberInt(849),
+    name: "MSI MAG B650 Tomahawk",
+    category: "carte_mere",
+    description: "Carte mère ATX pour processeurs AMD AM5.",
+    tags: ["carte mère", "msi", "am5", "atx"],
+    price_cents: NumberInt(18900),
     status: "active",
-    attributes: { pieces: 6, marinade: "curry" }
+    attributes: { socket: "AM5", chipset: "B650", form_factor: "ATX", ram_type: "DDR5" }
   },
   {
     product_id: NumberInt(8),
-    name: "Filets de poulet fermier x2",
-    category: "filets",
-    description: "Lot de 2 filets de poulet fermier bio, élevés en plein air pour une qualité supérieure.",
-    tags: ["poulet", "filets", "fermier", "bio"],
-    price_cents: NumberInt(999),
+    name: "Corsair RM750e",
+    category: "alimentation",
+    description: "Alimentation 750 W modulaire certifiée 80+ Gold.",
+    tags: ["alimentation", "corsair", "750w", "modulaire"],
+    price_cents: NumberInt(9900),
     status: "active",
-    attributes: { pieces: 2, weight_g: 400, bio: true }
+    attributes: { power_w: 750, certification: "80+ Gold", modular: true }
   },
   {
     product_id: NumberInt(9),
-    name: "Cordons bleus poulet x4",
-    category: "transforme",
-    description: "Lot de 4 cordons bleus de poulet, parfaits pour les repas en famille.",
-    tags: ["poulet", "cordons bleus", "repas familial"],
-    price_cents: NumberInt(599),
+    name: "Fractal Design North",
+    category: "boitier",
+    description: "Boîtier ATX avec façade en bois et panneau vitré.",
+    tags: ["boîtier", "fractal", "atx"],
+    price_cents: NumberInt(13900),
     status: "active",
-    attributes: { pieces: 4, fourrage: "fromage" }
+    attributes: { form_factor: "ATX", color: "noir", glass_panel: true }
   },
   {
     product_id: NumberInt(10),
-    name: "Poulet entier fermier bio",
-    category: "rotisserie",
-    description: "Poulet entier fermier bio, élevé en plein air, pour une saveur authentique et naturelle.",
-    tags: ["poulet", "entier", "fermier", "bio"],
-    price_cents: NumberInt(1499),
+    name: "Noctua NH-D15",
+    category: "refroidissement",
+    description: "Ventirad double tour très silencieux.",
+    tags: ["ventirad", "noctua", "silencieux"],
+    price_cents: NumberInt(10900),
     status: "active",
-    attributes: { weight_g: 1500, bio: true, label: "Label Rouge" }
+    attributes: { type: "ventirad", height_mm: 165, fans: 2 }
   }
 ]);
-

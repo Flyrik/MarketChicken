@@ -19,49 +19,54 @@ INSERT INTO inventory.warehouses (name, capacity_units) VALUES
 ('Entrepôt Lyon',   3000);
 
 -- STOCK (product_id = ceux du catalogue Mongo, warehouse_id = 1 ou 2) 
+
 INSERT INTO inventory.stock (product_id, warehouse_id, quantity) VALUES
-(1,  1, 120),
-(2,  1,  80),
-(3,  1,  95),
-(4,  1, 200),
-(5,  1,  60),
-(6,  2, 110),
-(7,  2,  75),
-(8,  2,  40),
-(9,  2, 150),
-(10, 2,  30);
+(1,  1,  50),   -- Ryzen 5 7600
+(2,  1,  40),   -- Core i5-14600K
+(3,  1,  30),   -- RTX 4060
+(4,  1,  15),   -- RX 7800 XT
+(5,  1, 120),   -- RAM DDR5 32 Go
+(6,  2, 100),   -- SSD 990 Pro
+(7,  2,  35),   -- Carte mère B650
+(8,  2,  60),   -- Alimentation RM750e
+(9,  2,  25),   -- Boîtier North
+(10, 2,  45);   -- Ventirad NH-D15
 
 -- COMMANDES 
 INSERT INTO orders.orders (customer_id, status, total_cents) VALUES
-(1, 'paid',      1398),   -- poulet rôti (899) + nuggets (549)
-(1, 'paid',       699),   -- escalopes
-(2, 'pending',   1498),   -- 2x cuisses (749 x 2)
-(3, 'paid',       849),   -- brochettes
-(3, 'shipped',   1598),   -- filets fermier (999) + cordons bleus (599)
-(4, 'cancelled',  499),   -- nuggets (annulée)
-(5, 'paid',      1499);   -- poulet fermier bio
+(1, 'paid',      30800),   -- Ryzen 5 (19900) + RAM (10900)
+(1, 'paid',      11900),   -- SSD
+(2, 'pending',   21800),   -- 2x RAM (10900 x 2)
+(3, 'paid',       9900),   -- Alimentation
+(3, 'shipped',   48800),   -- RTX 4060 (29900) + carte mère (18900)
+(4, 'cancelled', 11900),   -- SSD (annulée)
+(5, 'paid',      52900);   -- RX 7800 XT
+
 
 --  LIGNES DE COMMANDE 
+
 INSERT INTO orders.order_items (order_id, product_id, quantity, unit_price_cents) VALUES
-(1, 1, 1, 899),    -- commande 1 : 1 poulet rôti
-(1, 4, 1, 499),    -- commande 1 : 1 nuggets       → total 1398... 
-(2, 5, 1, 699),    -- commande 2 : 1 escalopes
-(3, 6, 2, 749),    -- commande 3 : 2x cuisses
-(4, 7, 1, 849),    -- commande 4 : 1 brochettes
-(5, 8, 1, 999),    -- commande 5 : 1 filets fermier
-(5, 9, 1, 599),    -- commande 5 : 1 cordons bleus
-(6, 4, 1, 499),    -- commande 6 : 1 nuggets (annulée)
-(7, 10, 1, 1499);  -- commande 7 : 1 poulet fermier bio
+(1, 1, 1, 19900),   -- commande 1 : Ryzen 5 7600
+(1, 5, 1, 10900),   -- commande 1 : RAM DDR5
+(2, 6, 1, 11900),   -- commande 2 : SSD
+(3, 5, 2, 10900),   -- commande 3 : 2x RAM DDR5
+(4, 8, 1,  9900),   -- commande 4 : Alimentation
+(5, 3, 1, 29900),   -- commande 5 : RTX 4060
+(5, 7, 1, 18900),   -- commande 5 : Carte mère B650
+(6, 6, 1, 11900),   -- commande 6 : SSD (annulée)
+(7, 4, 1, 52900);   -- commande 7 : RX 7800 XT
 
 -- PAIEMENTS 
+
 INSERT INTO payments.payments (order_id, amount_cents, status) VALUES
-(1, 1398, 'completed'),
-(2,  699, 'completed'),
-(3, 1498, 'pending'),
-(4,  849, 'completed'),
-(5, 1598, 'completed'),
-(6,  499, 'refunded'),
-(7, 1499, 'completed');
+(1, 30800, 'completed'),
+(2, 11900, 'completed'),
+(3, 21800, 'pending'),
+(4,  9900, 'completed'),
+(5, 48800, 'completed'),
+(6, 11900, 'refunded'),
+(7, 52900, 'completed');
+
 
 -- RÔLES RBAC 
 INSERT INTO auth.roles (name, description) VALUES

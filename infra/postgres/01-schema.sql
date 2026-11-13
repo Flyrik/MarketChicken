@@ -100,7 +100,7 @@ CREATE INDEX IF NOT EXISTS stock_warehouse_id_idx
     ON inventory.stock (warehouse_id);
 
 -- Auth : utilisateurs ayant un rôle donné
-CREATE INDEX IF NOT EXISTS user_roles
+CREATE INDEX IF NOT EXISTS user_roles_role_id_idx
     ON auth.user_roles (role_id);
 
 CREATE INDEX IF NOT EXISTS orders_created_at_idx
